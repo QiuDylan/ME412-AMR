@@ -32,6 +32,7 @@ float map_bearing(float x, float y);         /* world-frame bearing from robot t
 /* ir_tracker.c - opponent base / opponent beacon */
 void ir_init(void);
 void ir_read(ir_t *r);
+void ir_indicate(const ir_t *r);             /* blink RGB LED while IR detected */
 bool ir_seen(const ir_t *r);
 bool ir_in_range(const ir_t *r);
 bool track_cmd(const ir_t *r, cmd_t *c);     /* false if no (safe) beacon seen */

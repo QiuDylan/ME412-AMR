@@ -24,7 +24,8 @@
 
 /* ================= drive.c : mecanum on 2x L298N (ENx = PWM, INx = direction) ================= */
 /* wheel order FL, FR, RL, RR. Remove the ENA/ENB jumpers on the L298N boards. */
-#define MOTOR_EN_PINS      {11, 14, 17, 38}
+#define MOTOR_EN_PINS      {11, 14, 17, 45}  /* GPIO45 = VDD_SPI strap: OK as EN (internal pulldown at
+                                                boot), never put a pull-up on it. GPIO38 is the RGB LED. */
 #define MOTOR_IN1_PINS     {12, 15, 18, 39}
 #define MOTOR_IN2_PINS     {13, 16, 21, 40}
 #define MOTOR_INVERT       {0, 1, 0, 1}  /* flip a wheel's direction without rewiring */
@@ -74,6 +75,11 @@ enum { TOF_F, TOF_FL, TOF_FR, TOF_L, TOF_R, TOF_B, N_TOF };
 #define IR_DETECT          300       /* min peak count to count as "seen" */
 #define IR_RANGE_SUM       2500      /* summed counts that mean "close enough to shoot" */
 #define KP_TRACK           0.7f      /* w per rad of IR bearing */
+/* --- IR detect indicator (on-board WS2812 RGB LED) --- */
+#define RGB_LED_PIN        38        /* on-board addressable RGB LED (ESP32-S3 DevKit) */
+#define IR_LED_THRESH      200       /* any IR sensor above this = blink LED (tune vs ambient) */
+#define IR_BLINK_MS        100       /* 100 ms on / 100 ms off */
+#define IR_DEBUG           1         /* 1 = print IR readings every loop (set 0 for competition) */
 
 /* ================= align.c : BNO080 IMU (SHTP over I2C) ================= */
 #define IMU_ADDR           0x4B      /* 0x4A if SA0 pulled low */
