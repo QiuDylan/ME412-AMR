@@ -2,9 +2,9 @@
 #include "robot.h"
 #include "driver/ledc.h"
 #include "driver/gpio.h"
-
+ 
 static const int en[4] = MOTOR_EN_PINS, in1[4] = MOTOR_IN1_PINS, in2[4] = MOTOR_IN2_PINS, inv[4] = MOTOR_INVERT;
-
+ 
 void drive_init(void)
 {
     ledc_timer_config(&(ledc_timer_config_t){ .speed_mode = LEDC_LOW_SPEED_MODE, .timer_num = LEDC_TIMER_0,
@@ -15,7 +15,7 @@ void drive_init(void)
         gpio_set_direction(in1[i], GPIO_MODE_OUTPUT); gpio_set_direction(in2[i], GPIO_MODE_OUTPUT);
     }
 }
-
+ 
 /* vx fwd, vy left, w CCW. Wheel order FL, FR, RL, RR. Normalized so no wheel exceeds 1. */
 void drive_set(float vx, float vy, float w)
 {
@@ -24,7 +24,10 @@ void drive_set(float vx, float vy, float w)
     for (int i = 0; i < 4; i++) {
         int fwd = (m[i] >= 0) ^ inv[i];
         gpio_set_level(in1[i], fwd); gpio_set_level(in2[i], !fwd);
-        ledc_set_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)i, (uint32_t)(fabsf(m[i]) / mx * MOTOR_PWM_MAX));
+        float mag = fabsf(m[i]) / mx;   /* 0..1; remap so any real command clears the L298N/motor stall floor */
+        float duty = mag < DRIVE_DEADZONE ? 0.0f : MOTOR_MIN_DUTY + (1.0f - MOTOR_MIN_DUTY) * mag;
+        ledc_set_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)i, (uint32_t)(duty * MOTOR_PWM_MAX));
         ledc_update_duty(LEDC_LOW_SPEED_MODE, (ledc_channel_t)i);
     }
 }
+ 

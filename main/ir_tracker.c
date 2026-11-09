@@ -37,27 +37,45 @@ void ir_init(void)
     led_rgb(0, 0, 0);
 }
 
+/* Oversample each phototransistor, subtract the ring minimum (ambient/sunlight/dark-offset estimate:
+ * the sensors facing away from the beacon only see ambient), then take a circular centroid of what is
+ * left. The centroid vector is low-passed so the bearing doesn't jitter; "seen" has hysteresis. */
 void ir_read(ir_t *r)
 {
-    int s = 0, pk = 0, v[N_IR]; float x = 0, y = 0;
-    for (int i = 0; i < N_IR; i++) { v[i] = adc_read(ch[i]); s += v[i]; x += v[i] * ca[i]; y += v[i] * sa[i]; if (v[i] > pk) pk = v[i]; }
-    r->sum = s; r->peak = pk; r->bearing = atan2f(y, x);
+    static float fx, fy; static bool seen; static int dbg;
+    int v[N_IR], mn = 1 << 30, s = 0, pk = 0; float x = 0, y = 0;
+    for (int i = 0; i < N_IR; i++) {
+        int a = 0; for (int k = 0; k < IR_OVERSAMPLE; k++) a += adc_read(ch[i]);
+        v[i] = a / IR_OVERSAMPLE; if (v[i] < mn) mn = v[i];
+    }
+    for (int i = 0; i < N_IR; i++) {
+        v[i] -= mn; s += v[i]; x += v[i] * ca[i]; y += v[i] * sa[i]; if (v[i] > pk) pk = v[i];
+    }
+    fx += IR_SMOOTH * (x - fx); fy += IR_SMOOTH * (y - fy);
+    seen = seen ? pk >= (int)(IR_DETECT * IR_RELEASE_FRAC) : pk >= IR_DETECT;
+    r->sum = s; r->peak = pk; r->seen = seen; r->bearing = atan2f(fy, fx);
 #if IR_DEBUG
-    printf("IR %4d %4d %4d %4d %4d %4d | brg %4.0f\n", v[0], v[1], v[2], v[3], v[4], v[5], r->bearing * 57.3f);
+    if (++dbg >= IR_DEBUG_EVERY) {
+        dbg = 0;
+        printf("IR %4d %4d %4d %4d %4d %4d | amb %4d | pk %4d | brg %4.0f | %s\n", v[0], v[1], v[2], v[3], v[4], v[5],
+               mn, pk, r->bearing * 57.3f, seen ? "SEEN" : "-");
+    }
 #endif
 }
 
-/* Non-blocking blink (red) while any sensor > IR_LED_THRESH; only touches the LED on change. */
+/* Non-blocking blink (red) while the tracker has a beacon seen; only touches the LED on change. */
 void ir_indicate(const ir_t *r)
 {
     static int64_t t0; static bool on;
     int64_t now = now_ms();
-    if (r->peak > IR_LED_THRESH) { if (now - t0 >= IR_BLINK_MS) { t0 = now; on = !on; led_rgb(on ? 64 : 0, 0, 0); } }
+    if (r->seen) { if (now - t0 >= IR_BLINK_MS) { t0 = now; on = !on; led_rgb(on ? 64 : 0, 0, 0); } }
     else if (on) { on = false; led_rgb(0, 0, 0); }
 }
 
-bool ir_seen(const ir_t *r)     { return r->peak >= IR_DETECT; }
+bool ir_seen(const ir_t *r)     { return r->seen; }
 bool ir_in_range(const ir_t *r) { return r->sum >= IR_RANGE_SUM; }
+
+static float clampf(float v, float lim) { return fminf(fmaxf(v, -lim), lim); }
 
 /* Rotate hull toward beacon while strafing straight at it (mecanum), stop when in range.
  * Beacons in the direction of our own base are ignored. TODO: tell robot (20 pts) from base (10). */
@@ -65,6 +83,23 @@ bool track_cmd(const ir_t *r, cmd_t *c)
 {
     if (!ir_seen(r) || !align_safe(align_yaw() + r->bearing)) return false;
     float v = ir_in_range(r) ? 0 : V_APPROACH;
-    c->w = KP_TRACK * r->bearing; c->vx = v * cosf(r->bearing); c->vy = v * sinf(r->bearing);
+    c->w = fabsf(r->bearing) > IR_ALIGN_TOL ? clampf(KP_TRACK * r->bearing, IR_W_MAX) : 0;
+    c->vx = v * cosf(r->bearing); c->vy = v * sinf(r->bearing);
     return true;
+}
+
+/* Rotate-only tracking (bench test / aiming): turn the whole robot until the beacon is dead ahead.
+ * Uses only the IR ring (no IMU/map). If the beacon is lost, spin in place toward the side it was
+ * last seen on. Returns true while the beacon is seen. */
+bool ir_orient_cmd(const ir_t *r, cmd_t *c)
+{
+    static int64_t t_seen; static float side = 1;
+    int64_t now = now_ms();
+    if (ir_seen(r)) {
+        t_seen = now; side = r->bearing >= 0 ? 1.0f : -1.0f;
+        c->w = fabsf(r->bearing) > IR_ALIGN_TOL ? clampf(KP_TRACK * r->bearing, IR_W_MAX) : 0;
+        return true;
+    }
+    if (now - t_seen > IR_LOST_MS) c->w = side * IR_SEARCH_W;
+    return false;
 }
