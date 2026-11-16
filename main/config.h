@@ -121,3 +121,66 @@ enum { TOF_F, TOF_FL, TOF_FR, TOF_L, TOF_R, TOF_B, N_TOF };
  
 /* ================= main.c ================= */
 #define START_BTN_PIN      0         /* on-board BOOT button, active low */
+
+/* ================= yahboom.c : Yahboom 4-ch encoder motor driver (I2C 0x26) ================= */
+/* Own I2C bus, separate from the BNO080/ToF bus. NOTE: GPIO10/11 are also used above (TOF_XSHUT /
+ * MOTOR_EN). Fine while IR_DEMO = 1 (those modules aren't initialised) - resolve before merging. */
+#define YB_I2C_PORT        I2C_NUM_1
+#define YB_SDA_PIN         10
+#define YB_SCL_PIN         11
+#define YB_ADDR            0x26
+#define YB_HZ              400000
+#define YB_TIMEOUT_MS      20
+#define YB_MOTOR_TYPE      1         /* driver type 1 = 520-style 11-line Hall encoder motor */
+#define YB_GEAR_RATIO      60        /* JGY370 100 rpm, 1:60 (integer only) */
+#define YB_ENC_LINES       11
+#define YB_WHEEL_MM        97.0f     /* mecanum wheel diameter */
+#define YB_WATCHDOG_MS     300       /* zero the wheels if a non-zero command isn't refreshed this often */
+#define YB_DEADZONE        1600      /* TODO: tune (0-3600) */
+#define YB_WHEEL_MAP       {3, 1, 2, 0}      /* driver motor (M1..M4 = 0..3) for FL, FR, RL, RR:
+                                                M1 = RR, M2 = FR, M3 = RL, M4 = FL (wheel-tested) */
+#define YB_DIR             {-1, -1, -1, -1}  /* so + speed = wheel drives robot forward (bench-tested) */
+#define YB_ENC_SIGN        -1        /* driver's encoder counts run opposite to its speed sign (CAL read -6817) */
+
+/* ================= mpu6050.c : MPU-6050 gyro heading (shares the Yahboom I2C bus) ================= */
+/* wire: VCC 3V3, GND, SDA GPIO10, SCL GPIO11, AD0 -> GND (0x68). Mount flat, chip Z axis up. */
+#define MPU_ADDR           0x68      /* 0x69 if AD0 is tied high */
+#define MPU_YAW_SIGN       1.0f      /* -1 if the board is mounted upside down (yaw grows clockwise) */
+#define MPU_DLPF           4         /* on-chip low-pass: 4 = ~20 Hz (rejects motor vibration) */
+#define MPU_BIAS_SAMPLES   200       /* gyro offset average at boot, 10 ms each -> keep still ~2 s */
+#define MPU_DEADBAND_DPS   0.3f      /* rates below this (after offset) count as zero: less drift at rest */
+
+/* ================= netlog.c : WiFi serial monitor (robot runs its own network) ================= */
+#define NET_LOG            1         /* 1 = WiFi log + remote START/STOP; 0 = USB serial only */
+#define NET_SSID           "ME412-AMR"
+#define NET_PASS           "me412robot"   /* WPA2, min 8 characters */
+#define NET_CHANNEL        6
+#define NET_PORT           3333      /* laptop: nc 192.168.4.1 3333 */
+
+/* ================= ir_demo.c : single BPV11F IR tracking demo ================= */
+#define IR_DEMO            1         /* 1 = boot into the IR demo (skips L298N/ToF/IMU/mission code) */
+#define MOTORS_OFF         0         /* 1 = every wheel command is sent as 0 (bench: robot stays put) */
+#define IRD_SENSE_TEST     0         /* 1 = sensor check: print IR + headings; START / Enter = one 360 turn by gyro */
+#define IRD_USE_IMU        1         /* 1 = heading from the MPU-6050 gyro (falls back to encoders if missing) */
+#define IRD_CAL            0         /* 1 = measure IRD_COUNTS_PER_360 instead (see ir_demo.c header) */
+#define YB_WHEEL_TEST      0         /* 1 = on START, run FL, FR, RL, RR forward one at a time (fix MAP/DIR) */
+#define IRD_ADC_CH         ADC_CHANNEL_4   /* GPIO5 */
+#define IRD_OVERSAMPLE     8
+#define IRD_LED            0         /* 1 = blink the RGB LED while IR is seen (off: suspected freeze on detect) */
+#define IRD_DETECT         70        /* counts above ambient = source seen (was 300; lowered after bench tests) */
+#define IRD_SEARCH_PERIOD_MS 10000   /* a spin that found nothing: spin again after this */
+#define IRD_RELEASE        0.6f      /* locked: still counts as seen down to this x IRD_DETECT */
+#define IRD_LOST_MS        1000      /* locked: source unseen this long -> spin again */
+#define IRD_PAST_PEAK      0.7f      /* after detecting, stop once signal < this x peak (past the beam centre) */
+#define IRD_PAST_DEG       30.0f     /* ...or this far past the peak, whichever first */
+#define IRD_COUNTS_PER_360 6817      /* measured with IRD_CAL = 1 (one run; re-check on the arena floor) */
+#define IRD_SEARCH_SPEED   150       /* Yahboom speed units (-1000..1000) while turning */
+#define IRD_MIN_SPEED      60        /* slowest turn that still moves (TUNE with YB_DEADZONE) */
+#define IRD_COAST_S        0.4f      /* start guess: s of turning after the stop is sent (learned each turn) */
+#define IRD_TOL_DEG        2.0f      /* yaw control: done when within +- this */
+#define IRD_HOLD_KP        0.4f      /* yaw control speed per count of error (19 counts/deg) */
+#define IRD_HOLD_MAX       100       /* yaw control max turn speed (slower than the scan) */
+#define IRD_HOLD_MS        3000      /* yaw control gives up after this */
+#define IRD_KP             0.5f      /* turn speed per remaining count (slow-down near target) */
+#define IRD_SWEEP_TIMEOUT_MS 20000   /* abort a turn that isn't finishing (stall / I2C errors) */
+#define IRD_DEBUG_EVERY    10        /* status print every N idle loops (10 = 5 Hz) */

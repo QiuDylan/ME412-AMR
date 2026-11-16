@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/CMakeFiles/bootloader"
+		},
+		{
+			"file" : "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/CMakeFiles/bootloader.rule"
+		},
+		{
+			"file" : "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/CMakeFiles/bootloader-complete.rule"
+		},
+		{
+			"file" : "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule"
+		},
+		{
+			"file" : "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule"
+		},
+		{
+			"file" : "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule"
+		},
+		{
+			"file" : "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule"
+		},
+		{
+			"file" : "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule"
+		},
+		{
+			"file" : "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule"
+		},
+		{
+			"file" : "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"bootloader"
+		],
+		"name" : "bootloader"
+	}
+}

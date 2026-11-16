@@ -55,5 +55,21 @@
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
-  "C_Cpp_Runner.msvcSecureNoWarnings": false
+  "C_Cpp_Runner.msvcSecureNoWarnings": false,
+  "idf.currentSetup": "/Users/pavankapoor/.espressif/v5.4/esp-idf",
+  "idf.port": "/dev/tty.usbmodem21101",
+  "idf.openOcdConfigs": [
+    "board/esp32s3-builtin.cfg"
+  ],
+  "idf.customExtraVars": {
+    "OPENOCD_USB_ADAPTER_LOCATION": "2-1.1",
+    "IDF_TARGET": "esp32s3"
+  },
+  "clangd.path": "/Users/pavankapoor/.espressif/tools/esp-clang/esp-18.1.2_20240912/esp-clang/bin/clangd",
+  "clangd.arguments": [
+    "--background-index",
+    "--query-driver=**",
+    "--compile-commands-dir=/Users/pavankapoor/Documents/GitHub/ME412-AMR/build"
+  ],
+  "idf.flashType": "UART"
 }

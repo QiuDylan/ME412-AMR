@@ -2,6 +2,7 @@
 #pragma once
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <math.h>
 #include "esp_timer.h"
@@ -52,6 +53,31 @@ void shoot_init(void);
 void shoot_start(float heading);             /* lock target heading */
 int  shoot_update(const ir_t *ir, cmd_t *c); /* 1 busy, 0 fired, -1 aborted */
  
+/* yahboom.c - Yahboom I2C motor driver, wheel order FL, FR, RL, RR */
+bool      yb_init(void);
+void      yb_wheels(const int16_t w[4]);   /* closed-loop speeds, -1000..1000 */
+void      yb_spin(int s);                  /* in place, + = CCW */
+void      yb_brake(void);                  /* PWM 0 on all motors, bypasses the driver's speed loop */
+esp_err_t yb_counts(int32_t c[4]);         /* total encoder counts, + = forward */
+i2c_master_bus_handle_t yb_bus(void);      /* the Yahboom's I2C bus, shared with the MPU-6050 */
+
+/* mpu6050.c - gyro-Z heading on the Yahboom bus */
+bool  mpu_init(i2c_master_bus_handle_t bus); /* robot must be still: measures gyro offset (~2 s) */
+float mpu_yaw_deg(void);                     /* integrated heading since init, + = CCW, not wrapped */
+
+/* netlog.c - WiFi serial monitor (NET_LOG = 1): printf also goes to a TCP client, remote START/STOP */
+void net_init(void);
+int  net_printf(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+bool net_take_start(void);                   /* true once per Enter typed in the client */
+bool net_stopped(void);                      /* true after 'x' typed: wheels forced to 0 */
+const char *reset_why(void);                 /* why the ESP32 last reset (brownout, crash, ...) */
+#if NET_LOG
+#define printf(...) net_printf(__VA_ARGS__)
+#endif
+
+/* ir_demo.c - single-sensor IR tracking demo (IR_DEMO = 1), never returns */
+void ir_demo_main(void);
+
 /* return_home.c */
 void home_init(void);
 bool dock_detected(void);

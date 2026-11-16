@@ -7,8 +7,18 @@
  
 typedef enum { S_WAIT, S_LEAVE, S_HUNT, S_SHOOT, S_RETURN, S_TRACK } state_t;
  
+#if IR_DEMO
+static void demo_task(void *arg) { ir_demo_main(); }
+#endif
+
 void app_main(void)
 {
+#if IR_DEMO
+    /* bench demo: one BPV11F + Yahboom driver only; nothing below is initialised. Own task with a big
+     * stack - the default 3.5 KB main stack is tight once printf also formats + sends over WiFi. */
+    xTaskCreate(demo_task, "ir_demo", 8192, NULL, 5, NULL);
+    vTaskDelete(NULL);
+#endif
     i2c_master_bus_handle_t bus;
     i2c_new_master_bus(&(i2c_master_bus_config_t){ .i2c_port = I2C_NUM_0, .sda_io_num = I2C_SDA_PIN, .scl_io_num = I2C_SCL_PIN,
         .clk_source = I2C_CLK_SRC_DEFAULT, .glitch_ignore_cnt = 7, .flags.enable_internal_pullup = 1 }, &bus);

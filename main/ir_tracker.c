@@ -20,6 +20,7 @@ int adc_read(adc_channel_t c) { int v = 0; adc_oneshot_read(adc, c, &v); return 
 
 static void led_rgb(uint8_t r, uint8_t g, uint8_t b)   /* WS2812 expects GRB, non-blocking */
 {
+    if (rmt_tx_wait_all_done(led_ch, 0) != ESP_OK) return;   /* previous frame still going: skip, don't block */
     static uint8_t px[3]; px[0] = g; px[1] = r; px[2] = b;
     rmt_transmit(led_ch, led_enc, px, 3, &(rmt_transmit_config_t){ 0 });
 }

@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/CMakeFiles/bootloader
+/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/CMakeFiles/bootloader.rule
+/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/CMakeFiles/bootloader-complete.rule
+/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
