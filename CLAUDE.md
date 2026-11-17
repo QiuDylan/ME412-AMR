@@ -94,6 +94,11 @@ but the robot is currently running a **bench IR-tracking demo** (`IR_DEMO 1`).
   driver (keep the mecanum kinematics, `drive_set` → `yb_wheels`), resolve pin conflicts,
   encoder odometry for `map.c`, add the IMU.
 
+## ToF (2026-11-17)
+- One **VL53L0X** works, wired directly on GPIO 13 (SDA) / 14 (SCL), `I2C_NUM_0`, 100 kHz, 0x29. Bench test
+  `TOF_TEST 1` (`main/vl53l0x.c`). TCA9548A mux never worked reliably (likely damaged; removed).
+- Handoff for obstacle avoidance: **`docs/TOF_HANDOFF.md`**.
+
 ## Known issues in the original code (from review, not yet fixed)
 - `TRACK_TEST 1` (mission bench mode); no init error checking in `main.c`;
   RGB LED may be GPIO 48 on some DevKits (code uses 38; 48 is also a ToF XSHUT);
