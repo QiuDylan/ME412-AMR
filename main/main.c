@@ -7,12 +7,19 @@
  
 typedef enum { S_WAIT, S_LEAVE, S_HUNT, S_SHOOT, S_RETURN, S_TRACK } state_t;
  
+#if TOF_TEST
+static void tof_task(void *arg) { tof_test_main(); }
+#endif
 #if IR_DEMO
 static void demo_task(void *arg) { ir_demo_main(); }
 #endif
 
 void app_main(void)
 {
+#if TOF_TEST
+    xTaskCreate(tof_task, "tof_test", 8192, NULL, 5, NULL);   /* ToF bench test replaces the IR demo */
+    vTaskDelete(NULL);
+#endif
 #if IR_DEMO
     /* bench demo: one BPV11F + Yahboom driver only; nothing below is initialised. Own task with a big
      * stack - the default 3.5 KB main stack is tight once printf also formats + sends over WiFi. */

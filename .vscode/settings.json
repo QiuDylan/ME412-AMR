@@ -57,7 +57,7 @@
   "C_Cpp_Runner.useLinkTimeOptimization": false,
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "idf.currentSetup": "/Users/pavankapoor/.espressif/v5.4/esp-idf",
-  "idf.port": "/dev/tty.usbmodem21101",
+  "idf.port": "/dev/tty.usbmodem5B900903111",
   "idf.openOcdConfigs": [
     "board/esp32s3-builtin.cfg"
   ],

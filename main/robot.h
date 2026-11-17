@@ -75,6 +75,9 @@ const char *reset_why(void);                 /* why the ESP32 last reset (browno
 #define printf(...) net_printf(__VA_ARGS__)
 #endif
 
+/* vl53l0x.c - ToF bench test (TOF_TEST = 1), never returns */
+void tof_test_main(void);
+
 /* ir_demo.c - single-sensor IR tracking demo (IR_DEMO = 1), never returns */
 void ir_demo_main(void);
 

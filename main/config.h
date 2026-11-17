@@ -157,6 +157,18 @@ enum { TOF_F, TOF_FL, TOF_FR, TOF_L, TOF_R, TOF_B, N_TOF };
 #define NET_CHANNEL        6
 #define NET_PORT           3333      /* laptop: nc 192.168.4.1 3333 */
 
+/* ================= vl53l0x.c : VL53L0X ToF bench test through a TCA9548A mux ================= */
+/* wire: mux VIN 3V3, GND, SDA GPIO13, SCL GPIO14, A0-A2 GND. Sensor on SDn/SCn, XSHUT unconnected. */
+#define TOF_TEST           1         /* 1 = boot into the ToF test instead of the IR demo (wheels stay off) */
+#define TOF_USE_YB_BUS     0         /* 1 = mux wired to the motor bus GPIO10/11 (works); 0 = own bus on 13/14 */
+#define TOF_I2C_PORT       I2C_NUM_0 /* Yahboom + MPU-6050 use I2C_NUM_1 */
+#define TOF_SDA_PIN        13
+#define TOF_SCL_PIN        14
+#define TOF_I2C_HZ         100000    /* safe with long wires; 400000 is fine on short ones */
+#define MUX_ADDR           0x70      /* TCA9548A, A0-A2 low */
+#define VL53L0X_ADDR       0x29
+#define TOF_MUX_CH         0         /* mux channel the front sensor is on (SD0/SC0) */
+
 /* ================= ir_demo.c : single BPV11F IR tracking demo ================= */
 #define IR_DEMO            1         /* 1 = boot into the IR demo (skips L298N/ToF/IMU/mission code) */
 #define MOTORS_OFF         0         /* 1 = every wheel command is sent as 0 (bench: robot stays put) */
