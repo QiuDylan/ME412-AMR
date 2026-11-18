@@ -7,6 +7,9 @@
  
 typedef enum { S_WAIT, S_LEAVE, S_HUNT, S_SHOOT, S_RETURN, S_TRACK } state_t;
  
+#if AVOID_DEMO
+static void avd_task(void *arg) { avoid_demo_main(); }
+#endif
 #if TOF_TEST
 static void tof_task(void *arg) { tof_test_main(); }
 #endif
@@ -16,6 +19,10 @@ static void demo_task(void *arg) { ir_demo_main(); }
 
 void app_main(void)
 {
+#if AVOID_DEMO
+    xTaskCreate(avd_task, "avoid", 8192, NULL, 5, NULL);     /* obstacle-avoidance demo */
+    vTaskDelete(NULL);
+#endif
 #if TOF_TEST
     xTaskCreate(tof_task, "tof_test", 8192, NULL, 5, NULL);   /* ToF bench test replaces the IR demo */
     vTaskDelete(NULL);

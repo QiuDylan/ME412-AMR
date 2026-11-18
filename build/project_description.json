@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "ME412_AMR",
-    "project_version":    "1369200-dirty",
+    "project_version":    "39f65d9-dirty",
     "project_path":       "/Users/pavankapoor/Documents/GitHub/ME412-AMR",
     "idf_path":           "/Users/pavankapoor/.espressif/v5.4/esp-idf",
     "build_dir":          "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build",
@@ -1195,7 +1195,7 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build/esp-idf/main/libmain.a",
-            "sources": [ "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/main.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/drive.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/avoid.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/map.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/ir_tracker.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/align.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/shoot.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/return_home.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/yahboom.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/ir_demo.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/mpu6050.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/netlog.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/vl53l0x.c" ],
+            "sources": [ "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/main.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/drive.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/avoid.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/map.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/ir_tracker.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/align.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/shoot.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/return_home.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/yahboom.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/ir_demo.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/mpu6050.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/netlog.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/vl53l0x.c", "/Users/pavankapoor/Documents/GitHub/ME412-AMR/main/avoid_demo.c" ],
             "include_dirs": [ "." ]
         },
         "mbedtls": {

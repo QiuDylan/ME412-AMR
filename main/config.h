@@ -159,7 +159,7 @@ enum { TOF_F, TOF_FL, TOF_FR, TOF_L, TOF_R, TOF_B, N_TOF };
 
 /* ================= vl53l0x.c : VL53L0X ToF bench test through a TCA9548A mux ================= */
 /* wire: mux VIN 3V3, GND, SDA GPIO13, SCL GPIO14, A0-A2 GND. Sensor on SDn/SCn, XSHUT unconnected. */
-#define TOF_TEST           1         /* 1 = boot into the ToF test instead of the IR demo (wheels stay off) */
+#define TOF_TEST           0         /* 1 = boot into the ToF test instead of the IR demo (wheels stay off) */
 #define TOF_USE_YB_BUS     0         /* 1 = mux wired to the motor bus GPIO10/11 (works); 0 = own bus on 13/14 */
 #define TOF_I2C_PORT       I2C_NUM_0 /* Yahboom + MPU-6050 use I2C_NUM_1 */
 #define TOF_SDA_PIN        13
@@ -168,6 +168,30 @@ enum { TOF_F, TOF_FL, TOF_FR, TOF_L, TOF_R, TOF_B, N_TOF };
 #define MUX_ADDR           0x70      /* TCA9548A, A0-A2 low */
 #define VL53L0X_ADDR       0x29
 #define TOF_MUX_CH         0         /* mux channel the front sensor is on (SD0/SC0) */
+#define TOF_N              3         /* sensors on the mux (avoidance demo): front, left, right */
+#define TOF_CHANS          {0, 1, 7} /* mux channel of each: front SD0, left SD1, right SD7 */
+#define TOF_DEG            {0, 35, -35}   /* pointing angle of each, + = left */
+
+/* ================= avoid_demo.c : obstacle-avoidance roam (VL53L0X front/left/right via mux on GPIO13/14) ================= */
+#define AVOID_DEMO         1         /* 1 = boot into the avoidance demo (wins over TOF_TEST and IR_DEMO) */
+#define AVD_FWD_SPEED      300       /* Yahboom speed units (-1000..1000) cruising forward */
+#define AVD_MIN_SPEED      250       /* forward speed just before the turn distance (150 stalled on 3 wheels) */
+#define AVD_SLOW_MM        700       /* start slowing below this */
+#define AVD_TURN_MM        400       /* obstacle closer than this -> brake and turn away */
+#define AVD_BACK_MM        200       /* closer than this -> back up first */
+#define AVD_BACK_MS        500
+#define AVD_BACK_SPEED     200
+#define AVD_TURN_DIR       1         /* turn direction when the side sensors can't tell (+1 left / CCW, -1 right) */
+#define AVD_SIDE_MM        300       /* a 35 deg side sensor closer than this also triggers an avoid */
+#define AVD_TURN_SPEED     300       /* in-place spin speed */
+#define AVD_MIN_TURN_DEG   45        /* always turn at least this far */
+#define AVD_CLEAR_MM       800       /* front farther than this = clear */
+#define AVD_EXTRA_DEG      30        /* keep turning this much after clear (sensor cone is narrow, robot is wide) */
+#define AVD_EXTRA_DEG_SIDES 10       /* same, when the 35 deg side sensors are fitted (they cover the width) */
+#define AVD_MAX_TURN_DEG   180       /* never turn more than this per avoid, then go forward */
+#define AVD_TURN_MAX_MS    2500      /* ...or longer than this (also ends the turn when lifted / gyro missing) */
+#define AVD_STALE_MS       300       /* no ToF reading this long -> stop */
+#define TOF_NONE_MM        2000      /* reported when the sensor sees nothing (VL53L0X max ~1.2-2 m) */
 
 /* ================= ir_demo.c : single BPV11F IR tracking demo ================= */
 #define IR_DEMO            1         /* 1 = boot into the IR demo (skips L298N/ToF/IMU/mission code) */

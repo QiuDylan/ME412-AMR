@@ -77,6 +77,14 @@ const char *reset_why(void);                 /* why the ESP32 last reset (browno
 
 /* vl53l0x.c - ToF bench test (TOF_TEST = 1), never returns */
 void tof_test_main(void);
+bool tof_start(void);                        /* ToF sensors (via mux if found) + background reader */
+int  tof_reinits(void);                      /* times the sensor dropped out and was set up again */
+int  tof_mm(void);                           /* front sensor: latest mm (TOF_NONE_MM = nothing seen), -1 = no fresh reading */
+int  tof_get(int i);                         /* sensor i (0 front, 1 left, 2 right), same convention */
+int  tof_count(void);                        /* sensors in use: TOF_N with the mux, 1 without */
+
+/* avoid_demo.c - obstacle-avoidance roam (AVOID_DEMO = 1), never returns */
+void avoid_demo_main(void);
 
 /* ir_demo.c - single-sensor IR tracking demo (IR_DEMO = 1), never returns */
 void ir_demo_main(void);

@@ -14,9 +14,6 @@
 # EXTERNAL cache entries
 ########################
 
-//No help, variable specified on the command line.
-CCACHE_ENABLE:UNINITIALIZED=0
-
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=/Users/pavankapoor/.espressif/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/xtensa-esp32s3-elf-addr2line
 
@@ -359,9 +356,6 @@ Mbed TLS_IS_TOP_LEVEL:STATIC=OFF
 Mbed TLS_SOURCE_DIR:STATIC=/Users/pavankapoor/.espressif/v5.4/esp-idf/components/mbedtls/mbedtls
 
 //No help, variable specified on the command line.
-PYTHON:UNINITIALIZED=/Users/pavankapoor/.espressif/tools/python/v5.4/venv/bin/python3
-
-//No help, variable specified on the command line.
 PYTHON_DEPS_CHECKED:UNINITIALIZED=1
 
 //Allow unsafe builds. These builds ARE NOT SECURE.
@@ -595,7 +589,7 @@ C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS:INTERNAL=1
 //Details about finding Git
 FIND_PACKAGE_MESSAGE_DETAILS_Git:INTERNAL=[/usr/local/bin/git][v2.15.0()]
 //Details about finding Python3
-FIND_PACKAGE_MESSAGE_DETAILS_Python3:INTERNAL=[/Users/pavankapoor/.espressif/tools/python/v5.4/venv/bin/python3][cfound components: Interpreter ][v3.12.16()]
+FIND_PACKAGE_MESSAGE_DETAILS_Python3:INTERNAL=[/Users/pavankapoor/.espressif/tools/python/v5.4/venv/bin/python][cfound components: Interpreter ][v3.12.16()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 //ADVANCED property for variable: GIT_EXECUTABLE
@@ -606,10 +600,10 @@ _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=/usr/local
 _Python3_Compiler_REASON_FAILURE:INTERNAL=
 //Development reason failure
 _Python3_Development_REASON_FAILURE:INTERNAL=
-_Python3_EXECUTABLE:INTERNAL=/Users/pavankapoor/.espressif/tools/python/v5.4/venv/bin/python3
+_Python3_EXECUTABLE:INTERNAL=/Users/pavankapoor/.espressif/tools/python/v5.4/venv/bin/python
 //Python3 Properties
 _Python3_INTERPRETER_PROPERTIES:INTERNAL=Python;3;12;16;32;64;;;abi3;/opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/lib/python3.12;/Users/pavankapoor/.espressif/tools/python/v5.4/venv/lib/python3.12;/Users/pavankapoor/.espressif/tools/python/v5.4/venv/lib/python3.12/site-packages;/Users/pavankapoor/.espressif/tools/python/v5.4/venv/lib/python3.12/site-packages
-_Python3_INTERPRETER_SIGNATURE:INTERNAL=f2a256309dfb99e35e735eae97d9eaa8
+_Python3_INTERPRETER_SIGNATURE:INTERNAL=48d11a078183d82d00d938c8e64cd61b
 //NumPy reason failure
 _Python3_NumPy_REASON_FAILURE:INTERNAL=
 

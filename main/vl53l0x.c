@@ -349,3 +349,130 @@ void tof_test_main(void)
         }
     }
 }
+
+/* ---------- background reader for the avoidance demo: TOF_N sensors on mux channels TOF_CHANS ----------
+ * All sensors keep address 0x29; the mux connects one channel at a time. Each sensor ranges continuously
+ * on its own; the task visits them in turn and only reads the ones with a new sample (non-blocking).
+ * No mux found -> only sensor 0 (front), wired directly. */
+static const int chans[TOF_N] = TOF_CHANS;
+static volatile int range_mm[TOF_N];
+static volatile int64_t range_t[TOF_N];
+static bool alive[TOF_N];
+static volatile int reinits;                 /* times a sensor had to be set up again */
+static int n_used = 1;                       /* sensors in use: TOF_N with the mux, 1 without */
+
+static void find_mux(void)                   /* TCA9548A at 0x70-0x77 (0x70 + A2 A1 A0) */
+{
+    for (int a = 0x70; a <= 0x77 && !mux; a++)
+        if (i2c_master_probe(bus, a, T_MS) == ESP_OK) {
+            i2c_master_bus_add_device(bus, &(i2c_device_config_t){ .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+                .device_address = a, .scl_speed_hz = TOF_I2C_HZ }, &mux);
+            printf("TOF: mux found at 0x%02X%s\n", a, a == MUX_ADDR ? "" : " - not 0x70: tie A0-A2 to GND");
+        }
+}
+
+static bool pick(int i) { return !mux || mux_select(chans[i]); }   /* connect sensor i */
+
+static bool setup_one(int i)
+{
+    if (!pick(i)) { printf("TOF%d: mux didn't take channel %d\n", i, chans[i]); return false; }
+    if (i2c_master_probe(bus, VL53L0X_ADDR, T_MS) != ESP_OK) {
+        printf("TOF%d: no sensor on %s%d\n", i, mux ? "mux channel SD" : "SDA/SCL", mux ? chans[i] : 0);
+        return false;
+    }
+    const char *fail = sensor_start();
+    if (fail) printf("TOF%d: init failed at: %s (I2C %s)\n", i, fail, esp_err_to_name(err));
+    else printf("TOF%d: ok (%s, %+d deg)\n", i, mux ? "mux" : "direct", ((const int[])TOF_DEG)[i]);
+    return !fail;
+}
+
+/* 1 = new sample in *mm, 0 = none yet, -1 = I2C error */
+static int poll_one(int *mm)
+{
+    err = ESP_OK;
+    int st;
+    if (chip) {
+        uint8_t b[17], r = 0;
+        l1_rd(0x31, &r, 1);
+        if (err) return -1;
+        if (!(r & 1)) return 0;
+        l1_rd(0x89, b, sizeof b);
+        st = b[0] & 0x1F; *mm = b[13] << 8 | b[14];
+        l1_wr8(0x86, 0x01);
+    } else {
+        uint8_t r = rd(0x13);
+        if (err) return -1;
+        if (!(r & 0x07)) return 0;
+        st = rd(0x14) >> 3 & 0x0F; *mm = rd16(0x14 + 10);
+        wr(0x0B, 0x01);
+    }
+    if (err) return -1;
+    if (st != (chip ? 9 : 11)) *mm = TOF_NONE_MM;          /* invalid = nothing in range */
+    return 1;
+}
+
+static void tof_task(void *arg)
+{
+    int bad[TOF_N] = { 0 };
+    int64_t retry_t[TOF_N] = { 0 };
+    for (;;) {
+        for (int i = 0; i < n_used; i++) {
+            int64_t now = now_ms();
+            if (!alive[i]) {                                /* not working: quiet retry every 2 s */
+                if (now - retry_t[i] > 2000) {
+                    retry_t[i] = now;
+                    if ((alive[i] = setup_one(i))) { printf("TOF%d: back\n", i); reinits++; }
+                }
+                continue;
+            }
+            int mm, r = pick(i) ? poll_one(&mm) : -1;
+            if (r == 1) { range_mm[i] = mm; range_t[i] = now_ms(); bad[i] = 0; continue; }
+            if (r == -1) bad[i]++;
+            /* I2C errors, or no new sample for a while (reset by motor noise / dip): set it up again.
+             * range_t is left alone, so tof_get() reports -1 (no reading) until a real sample arrives. */
+            bool stale = now - range_t[i] > AVD_STALE_MS && now - retry_t[i] > AVD_STALE_MS;
+            if (bad[i] >= 2 || stale) {
+                printf("TOF%d: dropped out (%s) - setting up again\n", i, bad[i] >= 2 ? esp_err_to_name(err) : "no samples");
+                i2c_master_bus_reset(bus);
+                retry_t[i] = now_ms();
+                alive[i] = setup_one(i);
+                bad[i] = 0;
+                reinits++;
+            }
+        }
+        vTaskDelay(pdMS_TO_TICKS(5));
+    }
+}
+
+bool tof_start(void)
+{
+    i2c_new_master_bus(&(i2c_master_bus_config_t){ .i2c_port = TOF_I2C_PORT, .sda_io_num = TOF_SDA_PIN,
+        .scl_io_num = TOF_SCL_PIN, .clk_source = I2C_CLK_SRC_DEFAULT, .glitch_ignore_cnt = 7,
+        .flags.enable_internal_pullup = 1 }, &bus);
+    i2c_master_bus_add_device(bus, &(i2c_device_config_t){ .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .device_address = VL53L0X_ADDR, .scl_speed_hz = TOF_I2C_HZ }, &tof);
+    for (int k = 1;; k++) {                                /* keep trying until the FRONT sensor works */
+        find_mux();
+        n_used = mux ? TOF_N : 1;
+        if (k == 1) printf("TOF: %s\n", mux ? "using the mux" : "no mux found - front sensor wired directly only");
+        for (int i = 0; i < n_used; i++) if (!alive[i]) alive[i] = setup_one(i);
+        if (alive[0]) break;
+        if (k == 3) printf("TOF: front sensor still failing - unplug ALL power 5 s, check wires/joints\n");
+        i2c_master_bus_reset(bus);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+    int64_t now = now_ms();
+    for (int i = 0; i < TOF_N; i++) { range_mm[i] = TOF_NONE_MM; range_t[i] = alive[i] ? now : 0; }
+    xTaskCreate(tof_task, "tof", 4096, NULL, 6, NULL);
+    return true;
+}
+
+int tof_reinits(void) { return reinits; }
+int tof_count(void) { return n_used; }
+/* latest distance of sensor i in mm (TOF_NONE_MM = nothing in range), -1 = no fresh reading / not fitted */
+int tof_get(int i)
+{
+    if (i < 0 || i >= n_used) return -1;
+    return now_ms() - range_t[i] > AVD_STALE_MS ? -1 : range_mm[i];
+}
+int tof_mm(void) { return tof_get(0); }
