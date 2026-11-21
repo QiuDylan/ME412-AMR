@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "ME412_AMR",
-    "project_version":    "39f65d9-dirty",
+    "project_version":    "277e096-dirty",
     "project_path":       "/Users/pavankapoor/Documents/GitHub/ME412-AMR",
     "idf_path":           "/Users/pavankapoor/.espressif/v5.4/esp-idf",
     "build_dir":          "/Users/pavankapoor/Documents/GitHub/ME412-AMR/build",
